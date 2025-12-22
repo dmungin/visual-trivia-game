@@ -250,7 +250,10 @@ function removeResult(name: string) {
 
 <template>
   <div class="image-curator">
-    <h2>Image Curator</h2>
+    <div class="header-row">
+      <h2>Image Curator</h2>
+      <button v-if="isConfigured" @click="router.push('/')" class="back-btn">← Back to Setup</button>
+    </div>
 
     <!-- API Config Step -->
     <div v-if="!isConfigured" class="config-section">
@@ -360,6 +363,26 @@ function removeResult(name: string) {
   margin: 0 auto;
   text-align: left;
   padding-bottom: 100px; /* Space for fixed status bar if we wanted it fixed, but here it's top */
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.back-btn {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+}
+
+.back-btn:hover {
+  background: rgba(255,255,255,0.1);
+  color: white;
 }
 
 .config-section, .curator-section {

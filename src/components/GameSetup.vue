@@ -11,11 +11,20 @@ function onNext() {
   router.push('/curator')
 }
 
-function onLoadGame(index: number) {
+function onPlayGame(index: number) {
   const game = savedGames.value[index]
   if (game) {
     gameStore.loadGame(game)
-    router.push('/assign') // Go straight to assignment as game is ready
+    router.push('/assign') // Go straight to assignment
+  }
+}
+
+function onEditGame(index: number) {
+  const game = savedGames.value[index]
+  if (game) {
+    gameStore.loadGame(game)
+    // Stay here, form is reactive and will update with loaded config
+    // Optionally scrolling to top or giving feedback could be nice
   }
 }
 
@@ -65,11 +74,11 @@ function onDeleteGame(index: number) {
         </div>
       </div>
 
-      <button class="next-btn primary-gradient" @click="onNext">Start New Game →</button>
+      <button class="next-btn primary-gradient" @click="onNext">Start Game Creation →</button>
     </div>
 
     <div class="saved-configs glass-card" v-if="savedGames.length > 0">
-      <h3>Resumable Games</h3>
+      <h3>Saved Games</h3>
       <div class="saved-list">
         <div v-for="(saved, index) in savedGames" :key="index" class="saved-item">
           <div class="saved-info">
@@ -77,7 +86,8 @@ function onDeleteGame(index: number) {
             <span class="meta">{{ saved.config.rounds }} rounds • {{ new Date(saved.createdAt).toLocaleDateString() }}</span>
           </div>
           <div class="saved-actions">
-            <button class="icon-btn load" @click="onLoadGame(index)" title="Load">▶</button>
+            <button class="icon-btn edit" @click="onEditGame(index)" title="Edit Configuration">✎</button>
+            <button class="icon-btn play" @click="onPlayGame(index)" title="Play Now">▶</button>
             <button class="icon-btn delete" @click="onDeleteGame(index)" title="Delete">×</button>
           </div>
         </div>
@@ -230,15 +240,31 @@ option {
   align-items: center;
   justify-content: center;
   font-size: 1rem;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
-.icon-btn.load {
+.icon-btn.edit {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.icon-btn.edit:hover {
+  background: var(--color-primary);
+}
+
+.icon-btn.play {
   background: var(--color-secondary);
   color: black;
 }
 
+.icon-btn.play:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px rgba(3, 218, 198, 0.4);
+}
+
 .icon-btn.delete {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.05);
   color: var(--color-text-dim);
 }
 
