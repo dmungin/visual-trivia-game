@@ -121,9 +121,9 @@ function saveGame() {
 
 <style scoped>
 .round-assignment {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -131,19 +131,39 @@ function saveGame() {
 
 .header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  padding: 2rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.header h2 {
+  align-self: flex-start;
+  margin-bottom: 0;
+  font-size: 2.5rem;
 }
 
 .controls {
+  width: 100%;
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
 }
 
 .instructions {
-  margin-bottom: 2rem;
-  color: #aaa;
+  margin-bottom: 1.5rem;
+  color: var(--color-text-dim);
+  font-size: 1.1rem;
+  text-align: center;
+  background: rgba(0,0,0,0.2);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
 }
 
 .rounds-container {
@@ -152,104 +172,150 @@ function saveGame() {
   overflow-x: auto;
   flex: 1;
   padding-bottom: 1rem;
+  align-items: flex-start;
 }
 
 .round-column {
-  flex: 0 0 300px;
-  background: #333;
-  border-radius: 8px;
+  flex: 0 0 320px;
+  background: rgba(30, 30, 30, 0.6);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: var(--shadow-lg);
+  max-height: 100%;
 }
 
 .round-header {
-  padding: 1rem;
-  background: #444;
+  padding: 1.5rem;
+  background: rgba(255,255,255,0.03);
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: bold;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.round-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--color-secondary);
+}
+
+.count {
+  background: rgba(0,0,0,0.4);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
 }
 
 .images-list {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  grid-auto-rows: min-content;
+  gap: 0.8rem;
+  align-content: start;
 }
 
 .image-card {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem;
-  background: #222;
-  border-radius: 4px;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-md);
   cursor: grab;
-  border: 1px solid #555;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  aspect-ratio: 0.8;
+}
+
+.image-card:hover {
+  background: rgba(255,255,255,0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
 .image-card:active {
   cursor: grabbing;
+  transform: scale(0.98);
 }
 
 .image-card img {
-  width: 50px;
-  height: 50px;
+  width: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
   border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .name {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%;
+  text-align: center;
+  color: var(--color-text-dim);
 }
 
 button {
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.5rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 50px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.2s;
 }
 
 .primary-btn {
-  background-color: var(--color-primary, #42b883);
+  background: var(--gradient-primary);
   color: white;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.primary-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 
 .secondary-btn {
-  background-color: #555;
+  background: rgba(255,255,255,0.1);
   color: white;
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
-button:hover {
-  opacity: 0.9;
+.secondary-btn:hover {
+  background: rgba(255,255,255,0.15);
 }
 
 .save-group {
   display: flex;
   gap: 0.5rem;
-  margin-right: 1rem;
+  margin-right: auto; /* Pushes other buttons to the right */
   padding-right: 1rem;
-  border-right: 1px solid #555;
+  align-items: center;
 }
 
 .save-input {
-  padding: 0.5rem;
-  border-radius: 4px;
-  border: 1px solid #555;
-  background: #222;
+  padding: 0.8rem 1rem;
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.3);
   color: white;
+  min-width: 200px;
 }
 
 .save-btn {
-  background-color: #2196F3;
-  color: white;
+  background: var(--color-secondary);
+  color: black;
 }
 </style>

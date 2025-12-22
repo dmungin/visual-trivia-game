@@ -3,6 +3,7 @@ export interface GameConfig {
     rounds: number;
     picturesPerRound: number;
     timePerRound: number; // in seconds
+    theme: 'default' | 'christmas';
 }
 
 export interface TriviaImage {

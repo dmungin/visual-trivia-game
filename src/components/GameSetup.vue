@@ -26,38 +26,60 @@ function onDeleteGame(index: number) {
 
 <template>
   <div class="setup-container">
-    <div class="game-setup">
+    <div class="glass-card game-setup">
       <h2>Game Setup</h2>
       
-      <div class="form-group">
-        <label for="rounds">Rounds:</label>
-        <input id="rounds" type="number" v-model="config.rounds" min="1" max="20" />
+      <div class="setup-form">
+        <div class="form-group">
+          <label for="rounds">Rounds</label>
+          <div class="input-wrapper">
+             <input id="rounds" type="number" v-model="config.rounds" min="1" max="20" />
+             <span class="unit">rounds</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="pictures">Pictures per Round</label>
+          <div class="input-wrapper">
+             <input id="pictures" type="number" v-model="config.picturesPerRound" min="1" max="9" />
+             <span class="unit">imgs</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="timer">Time per Round</label>
+          <div class="input-wrapper">
+             <input id="timer" type="number" v-model="config.timePerRound" min="10" max="300" step="10" />
+             <span class="unit">sec</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="theme">Theme</label>
+           <div class="input-wrapper">
+             <select id="theme" v-model="config.theme">
+               <option value="default">Default Dark</option>
+               <option value="christmas">🎄 Christmas</option>
+             </select>
+          </div>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="pictures">Pictures per Round:</label>
-        <input id="pictures" type="number" v-model="config.picturesPerRound" min="1" max="9" />
-      </div>
-
-      <div class="form-group">
-        <label for="timer">Time per Round (seconds):</label>
-        <input id="timer" type="number" v-model="config.timePerRound" min="10" max="300" />
-      </div>
-
-      <button class="next-btn" @click="onNext">Next: Select Images</button>
+      <button class="next-btn primary-gradient" @click="onNext">Start New Game →</button>
     </div>
 
-    <div class="saved-configs" v-if="savedGames.length > 0">
-      <h3>Saved Games</h3>
-      <div v-for="(saved, index) in savedGames" :key="index" class="saved-item">
-        <div class="saved-info">
-          <strong>{{ saved.name }}</strong>
-          <span>{{ saved.config.rounds }} rounds, {{ saved.images.length }} images</span>
-          <span class="date">{{ new Date(saved.createdAt).toLocaleDateString() }}</span>
-        </div>
-        <div class="saved-actions">
-          <button @click="onLoadGame(index)">Load</button>
-          <button class="delete-btn" @click="onDeleteGame(index)">×</button>
+    <div class="saved-configs glass-card" v-if="savedGames.length > 0">
+      <h3>Resumable Games</h3>
+      <div class="saved-list">
+        <div v-for="(saved, index) in savedGames" :key="index" class="saved-item">
+          <div class="saved-info">
+            <strong>{{ saved.name }}</strong>
+            <span class="meta">{{ saved.config.rounds }} rounds • {{ new Date(saved.createdAt).toLocaleDateString() }}</span>
+          </div>
+          <div class="saved-actions">
+            <button class="icon-btn load" @click="onLoadGame(index)" title="Load">▶</button>
+            <button class="icon-btn delete" @click="onDeleteGame(index)" title="Delete">×</button>
+          </div>
         </div>
       </div>
     </div>
@@ -68,79 +90,130 @@ function onDeleteGame(index: number) {
 .setup-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 3rem;
   align-items: center;
+  max-width: 500px;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .game-setup, .saved-configs {
   width: 100%;
-  max-width: 400px;
-  padding: 2rem;
-  background: #333;
-  border-radius: 8px;
+  padding: 2.5rem;
+  text-align: left;
 }
 
-.saved-configs {
-  background: #2a2a2a;
+h2 {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.setup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  text-align: left;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
 }
 
 label {
-  margin-bottom: 0.5rem;
-  font-weight: bold;
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-input {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border-radius: 4px;
-  border: 1px solid #555;
+.input-wrapper {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: var(--radius-md);
+  padding: 0 1rem;
+  transition: border-color 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--color-primary);
+}
+
+input, select {
+  flex: 1;
+  padding: 0.8rem 0;
+  font-size: 1.1rem;
+  background: transparent;
+  border: none;
+  color: white;
+  outline: none;
+}
+
+option {
   background: #222;
   color: white;
 }
 
-
-button {
-  padding: 0.5rem 1rem;
-  background-color: var(--color-primary, #42b883);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.unit {
+  color: var(--color-text-dim);
+  font-size: 0.9rem;
 }
 
 .next-btn {
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   padding: 1rem;
+  font-size: 1.1rem;
+  border-radius: 50px;
+  background: var(--gradient-primary);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(124, 77, 255, 0.4);
+}
+
+.next-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 77, 255, 0.6);
+}
+
+.saved-configs h3 {
   font-size: 1.2rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-secondary);
+}
+
+.saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .saved-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: #222;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
+  padding: 1rem;
+  background: rgba(255,255,255,0.05);
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
+}
+
+.saved-item:hover {
+  background: rgba(255,255,255,0.08);
 }
 
 .saved-info {
   display: flex;
   flex-direction: column;
-  text-align: left;
+}
+
+.meta {
+  font-size: 0.8rem;
+  color: var(--color-text-dim);
+  margin-top: 0.2rem;
 }
 
 .saved-actions {
@@ -148,8 +221,29 @@ button:disabled {
   gap: 0.5rem;
 }
 
-.delete-btn {
-  background: #ff4444;
-  padding: 0.25rem 0.5rem;
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+}
+
+.icon-btn.load {
+  background: var(--color-secondary);
+  color: black;
+}
+
+.icon-btn.delete {
+  background: rgba(255,255,255,0.1);
+  color: var(--color-text-dim);
+}
+
+.icon-btn.delete:hover {
+  background: var(--color-error);
+  color: white;
 }
 </style>

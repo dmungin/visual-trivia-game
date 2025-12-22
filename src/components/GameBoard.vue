@@ -86,9 +86,12 @@ function onNextRound() {
 
 <style scoped>
 .game-board {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 1rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
@@ -96,22 +99,31 @@ function onNextRound() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  padding: 1rem 2rem;
+  background: rgba(0,0,0,0.3);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(5px);
 }
 
 .game-area {
   position: relative;
+  flex: 1;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  transition: all 0.3s;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
-  transition: filter 0.3s ease;
+  transition: filter 0.5s ease;
 }
 
 .grid.blurred {
-  filter: blur(10px);
+  filter: blur(20px) brightness(0.7);
   pointer-events: none;
 }
 
@@ -125,48 +137,58 @@ function onNextRound() {
   justify-content: center;
   align-items: center;
   z-index: 10;
-  background: rgba(0, 0, 0, 0.2); /* Slight dim */
+  border-radius: var(--radius-lg);
 }
 
 .overlay-content {
-  background: rgba(0, 0, 0, 0.8);
-  padding: 2rem 4rem;
-  border-radius: 12px;
+  background: rgba(30, 30, 30, 0.85); /* Slightly clearer */
+  padding: 3rem 5rem;
+  border-radius: var(--radius-lg);
   text-align: center;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-  border: 1px solid #555;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
 .overlay-content h3 {
-  font-size: 2.5rem;
+  font-size: 3.5rem;
   margin: 0 0 1rem 0;
-  color: white;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
 }
 
 .start-btn {
-  font-size: 1.5rem;
-  padding: 1rem 3rem;
-  background: var(--color-primary);
+  font-size: 1.8rem;
+  padding: 1rem 4rem;
+  background: var(--gradient-primary);
   color: white;
   border: none;
-  border-radius: 8px;
+  border-radius: 50px;
   cursor: pointer;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .start-btn:hover {
-  filter: brightness(1.1);
-}
-
-.round-over-actions {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
 }
 
 .toggle-answers-btn {
-  background: #2196F3;
-  font-size: 1.2rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+
+.toggle-answers-btn:hover {
+  background: rgba(255,255,255,0.2);
 }
 
 .answer-label {
@@ -174,22 +196,31 @@ function onNextRound() {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(0, 0, 0, 0.85);
+  background: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 0.5rem;
+  padding: 0.8rem;
   text-align: center;
-  font-weight: bold;
-  font-size: 1.1rem;
+  font-weight: 700;
+  font-size: 1.2rem;
   z-index: 5;
+  backdrop-filter: blur(4px);
 }
 
 .card {
   position: relative;
   aspect-ratio: 1;
-  background: #222;
-  border-radius: 12px;
+  background: #1a1a1a;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+  border-color: rgba(255,255,255,0.2);
 }
 
 .image-wrapper {
@@ -202,48 +233,68 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
 }
 
 .number-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 40px;
-  height: 40px;
-  background: var(--color-primary);
+  top: 15px;
+  left: 15px;
+  width: 45px;
+  height: 45px;
+  background: var(--gradient-primary);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  font-size: 1.4rem;
+  font-weight: 800;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  z-index: 2;
+  border: 2px solid rgba(255,255,255,0.2);
 }
 
 .controls {
   margin-top: 2rem;
-  min-height: 60px; /* Prevent layout jump */
+  min-height: 80px;
   display: flex;
   justify-content: center;
 }
 
 .control-group {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
+  background: rgba(0,0,0,0.4);
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
 }
 
 button {
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
-  background-color: #4CAF50;
+  padding: 0.8rem 2rem;
+  font-size: 1.1rem;
+  border-radius: 50px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
   color: white;
   border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-button:hover {
-  background-color: #45a049;
+/* Primary Action Button Style */
+button:not(.toggle-answers-btn) {
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+button:not(.toggle-answers-btn):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
 }
 </style>

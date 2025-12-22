@@ -8,6 +8,7 @@ export const useGameStore = defineStore('game', () => {
         rounds: 3,
         picturesPerRound: 30,
         timePerRound: 600,
+        theme: 'default',
     })
 
     const savedGames = ref<SavedGame[]>([])
