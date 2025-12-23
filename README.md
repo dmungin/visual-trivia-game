@@ -28,6 +28,29 @@ A customizable, visual trivia game application built with Vue 3 and TypeScript. 
     -   Game summary screen with all images and names.
     -   Printable answer key view for the gamemaster.
 
+### Images
+
+Game Creation
+<img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
+
+Image Curator
+<img width="1683" height="802" alt="Image" src="https://github.com/user-attachments/assets/2d954dcb-a79f-4578-849d-413ef212c770" />
+
+
+<img width="1660" height="897" alt="Image" src="https://github.com/user-attachments/assets/ed9489db-018a-4726-bd1e-2a64b5a964a6" />
+
+Round Assignment
+<img width="1859" height="882" alt="Image" src="https://github.com/user-attachments/assets/b58e9cd2-a11d-41f6-9fc0-8f2428bf4464" />
+
+Game Board
+<img width="1876" height="784" alt="Image" src="https://github.com/user-attachments/assets/fa0bfbe7-4d5d-4193-a776-945fa78f2d40" />
+
+Answer Board
+<img width="1857" height="898" alt="Image" src="https://github.com/user-attachments/assets/1c30e18b-f3ce-4e7f-9254-1f506f943cab" />
+
+Printable Answer Key
+<img width="1850" height="824" alt="Image" src="https://github.com/user-attachments/assets/35912f4f-7868-4c4e-98d6-cea65285b7b3" />
+
 ## Tech Stack
 
 -   **Vue 3** (Composition API, `<script setup>`)
@@ -103,29 +126,6 @@ The output will be in the `dist/` directory, ready to serve.
     -   The timer counts down.
     -   When round is over, the host can reveal answers on screen or check the printed key.
     -   Proceed to the next round until finished.
-
-### Images
-
-Game Creation
-<img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
-
-Image Curator
-<img width="1683" height="802" alt="Image" src="https://github.com/user-attachments/assets/2d954dcb-a79f-4578-849d-413ef212c770" />
-
-
-<img width="1660" height="897" alt="Image" src="https://github.com/user-attachments/assets/ed9489db-018a-4726-bd1e-2a64b5a964a6" />
-
-Round Assignment
-<img width="1859" height="882" alt="Image" src="https://github.com/user-attachments/assets/b58e9cd2-a11d-41f6-9fc0-8f2428bf4464" />
-
-Game Board
-<img width="1876" height="784" alt="Image" src="https://github.com/user-attachments/assets/fa0bfbe7-4d5d-4193-a776-945fa78f2d40" />
-
-Answer Board
-<img width="1857" height="898" alt="Image" src="https://github.com/user-attachments/assets/1c30e18b-f3ce-4e7f-9254-1f506f943cab" />
-
-Printable Answer Key
-<img width="1850" height="824" alt="Image" src="https://github.com/user-attachments/assets/35912f4f-7868-4c4e-98d6-cea65285b7b3" />
 
 ## Contributing
 
