@@ -34,6 +34,10 @@ A customizable, visual trivia game application built with Vue 3 and TypeScript. 
 
 <img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
 
+#### API Keys Dialog
+
+<img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
+
 #### Image Curator
 
 <img width="1683" height="802" alt="Image" src="https://github.com/user-attachments/assets/2d954dcb-a79f-4578-849d-413ef212c770" />
@@ -87,7 +91,7 @@ To use the Google Image Search feature, you need to set up a Google Custom Searc
     -   Ensure "Image search" is enabled.
     -   Select "Search the entire web".
 
-5.  **Environment Variables**:
+5.  **Environment Variables (Local Development)**:
     Create a `.env` file in the root directory (copy from `example.env` if available) and add:
 
     ```env
@@ -95,7 +99,11 @@ To use the Google Image Search feature, you need to set up a Google Custom Searc
     VITE_GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id_here
     ```
 
-    *Note: You can also enter these keys directly in the app UI ("Image Curator" screen), but `env` setup is recommended for repeated use.*
+6.  **UI Setup (Deployed App)**:
+    - Click the **Gear Icon (⚙️)** on the main "Game Setup" screen.
+    - Enter your API Key and Search Engine ID.
+    - These values are saved to your browser's **Local Storage** and will persist across visits.
+    - *Note: If keys are missing, the Gear icon will pulsate to remind you.*
 
 ## Usage
 
