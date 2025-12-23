@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
 import { storeToRefs } from 'pinia'
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import Timer from './Timer.vue'
 
 import { useRouter } from 'vue-router'
@@ -133,6 +133,12 @@ function onNextRound() {
     </div>
 
     <div class="controls">
+      <div v-if="state.roundStatus === 'active'" class="control-group">
+        <button @click="onTimeout" class="secondary-btn end-round-btn">
+          End Round
+        </button>
+      </div>
+      
       <div v-if="state.roundStatus === 'complete'" class="control-group">
         <button @click="showAnswers = !showAnswers" class="toggle-answers-btn">
           {{ showAnswers ? 'Hide Answers' : 'Show Answers' }}
@@ -368,13 +374,27 @@ button {
 }
 
 /* Primary Action Button Style */
-button:not(.toggle-answers-btn) {
+button:not(.toggle-answers-btn):not(.end-round-btn) {
   background: var(--gradient-primary);
   box-shadow: 0 4px 15px rgba(0,0,0,0.2);
 }
 
-button:not(.toggle-answers-btn):hover {
+button:not(.toggle-answers-btn):not(.end-round-btn):hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.end-round-btn {
+  background: rgba(255, 68, 68, 0.2);
+  border: 1px solid rgba(255, 68, 68, 0.4);
+  color: #ffaaaa;
+}
+
+.end-round-btn:hover {
+  background: rgba(255, 68, 68, 0.3);
+  border-color: #ff4444;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 68, 68, 0.2);
 }
 </style>
