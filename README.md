@@ -32,11 +32,11 @@ A customizable, visual trivia game application built with Vue 3 and TypeScript. 
 
 #### Game Creation
 
-<img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
+<img width="537" height="674" alt="Image" src="https://github.com/user-attachments/assets/1b98e3e5-bae8-4a2a-b56f-b9ffd0e618f6" />
 
 #### API Keys Dialog
 
-<img width="632" height="892" alt="Image" src="https://github.com/user-attachments/assets/35fba05c-ce02-419e-9bf2-21a9e27ad494" />
+<img width="520" height="540" alt="Image" src="https://github.com/user-attachments/assets/f815119d-6d92-4c2f-a853-152a42ddbc8a" />
 
 #### Image Curator
 
