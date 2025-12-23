@@ -2,11 +2,16 @@
 import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/game'
 import { storeToRefs } from 'pinia'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import SettingsDialog from './SettingsDialog.vue'
 
 const router = useRouter()
 const gameStore = useGameStore()
-const { config, savedGames } = storeToRefs(gameStore)
+const { config, savedGames, apiConfig } = storeToRefs(gameStore)
+
+const showSettings = ref(false)
+
+const isMisconfigured = computed(() => !apiConfig.value.apiKey || !apiConfig.value.searchEngineId)
 
 const minutesPerRound = computed({
   get: () => config.value.timePerRound / 60,
@@ -42,7 +47,22 @@ function onDeleteGame(index: number) {
 <template>
   <div class="setup-container">
     <div class="glass-card game-setup">
-      <h2>Game Setup</h2>
+      <div class="header-row">
+         <h2>Game Setup</h2>
+         <div class="settings-wrapper">
+            <button 
+              class="icon-btn settings-btn" 
+              :class="{ 'needs-attention': isMisconfigured }" 
+              @click="showSettings = true" 
+              title="Settings"
+            >⚙️</button>
+            <div v-if="isMisconfigured" class="tooltip">
+               Configure API Keys here!
+            </div>
+         </div>
+      </div>
+
+      <SettingsDialog :is-open="showSettings" @close="showSettings = false" />
       
       <div class="setup-form">
         <div class="form-group">
@@ -119,10 +139,67 @@ function onDeleteGame(index: number) {
   text-align: left;
 }
 
-h2 {
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 2rem;
-  text-align: center;
+  position: relative;
 }
+
+h2 {
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.settings-wrapper {
+  position: relative;
+  width: 40px;
+  height: 40px;
+}
+
+/* .settings-btn styles moved to bottom to override .icon-btn */
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 152, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+}
+
+.tooltip {
+  position: absolute;
+  top: 100%;
+  right: 0; 
+  margin-top: 10px;
+  background: #ff9800;
+  color: black;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: slideIn 0.3s ease;
+  z-index: 10;
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 12px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid #ff9800;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 
 .setup-form {
   display: flex;
@@ -246,6 +323,8 @@ option {
   align-items: center;
   justify-content: center;
   font-size: 1rem;
+  line-height: 1;
+  padding: 0 0 1px 1px; 
   transition: all 0.2s;
   cursor: pointer;
 }
@@ -253,6 +332,7 @@ option {
 .icon-btn.edit {
   background: rgba(255, 255, 255, 0.1);
   color: white;
+  padding: 0 0 0 1px;
 }
 
 .icon-btn.edit:hover {
@@ -262,6 +342,7 @@ option {
 .icon-btn.play {
   background: var(--color-secondary);
   color: black;
+  padding: 0 0 0 4px;
 }
 
 .icon-btn.play:hover {
@@ -276,6 +357,29 @@ option {
 
 .icon-btn.delete:hover {
   background: var(--color-error);
+  color: white;
+}
+
+/* Settings Button override */
+.settings-btn {
+  width: 100%; /* Fill the wrapper */
+  height: 100%;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  position: relative;
+  z-index: 2;
+}
+
+.settings-btn.needs-attention {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 0 rgba(255, 152, 0, 0.4);
+  background: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.settings-btn:hover {
+  background: var(--color-primary);
+  transform: rotate(90deg);
   color: white;
 }
 </style>

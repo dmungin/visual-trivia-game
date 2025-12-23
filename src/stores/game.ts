@@ -13,6 +13,12 @@ export const useGameStore = defineStore('game', () => {
 
     const savedGames = ref<SavedGame[]>([])
 
+    // API Config
+    const apiConfig = ref({
+        apiKey: import.meta.env.VITE_GOOGLE_API_KEY || localStorage.getItem('trivia_api_key') || '',
+        searchEngineId: import.meta.env.VITE_GOOGLE_SEARCH_ENGINE_ID || localStorage.getItem('trivia_search_engine_id') || ''
+    })
+
     // State
     const state = ref<GameState>({
         currentRound: 0,
@@ -187,9 +193,17 @@ export const useGameStore = defineStore('game', () => {
     // Initialize
     loadSavedGames()
 
+    function updateApiConfig(key: string, cx: string) {
+        apiConfig.value.apiKey = key
+        apiConfig.value.searchEngineId = cx
+        localStorage.setItem('trivia_api_key', key)
+        localStorage.setItem('trivia_search_engine_id', cx)
+    }
+
     return {
         config,
         savedGames,
+        apiConfig,
         state,
         assignedRounds,
         currentRoundImages,
@@ -197,6 +211,7 @@ export const useGameStore = defineStore('game', () => {
         isValidGame,
         validationErrors,
         setConfig,
+        updateApiConfig,
         saveGame,
         loadGame,
         deleteGame,

@@ -8,13 +8,13 @@ import type { TriviaImage } from '../types';
 
 const router = useRouter();
 const gameStore = useGameStore();
-const { isValidGame, validationErrors, totalImagesNeeded } = storeToRefs(gameStore);
+const { isValidGame, validationErrors, totalImagesNeeded, apiConfig } = storeToRefs(gameStore);
 
 const emit = defineEmits(['complete']);
 
 // Config State
-const apiKey = ref(import.meta.env.VITE_GOOGLE_API_KEY || '');
-const searchEngineId = ref(import.meta.env.VITE_GOOGLE_SEARCH_ENGINE_ID || '');
+const apiKey = ref(apiConfig.value.apiKey);
+const searchEngineId = ref(apiConfig.value.searchEngineId);
 const isConfigured = ref(false);
 
 // Search State
@@ -72,6 +72,9 @@ let searchService: ImageSearchService | null = null;
 
 function configureApi() {
   if (apiKey.value && searchEngineId.value) {
+    // Persist to store/local storage
+    gameStore.updateApiConfig(apiKey.value, searchEngineId.value);
+    
     searchService = new ImageSearchService({
       apiKey: apiKey.value,
       searchEngineId: searchEngineId.value,
@@ -312,7 +315,7 @@ function deleteImageFromCache(item: typeof searchResults.value[0], imageUrl: str
         <input v-model="searchEngineId" placeholder="0123..." />
       </div>
       <button @click="configureApi" :disabled="!apiKey || !searchEngineId">Start Session</button>
-      <p class="hint">Keys are not saved permanently for security.</p>
+      <p class="hint">Keys are saved to your browser's local storage for future visits.</p>
       
       <div class="divider">OR</div>
       
@@ -576,6 +579,10 @@ button:disabled {
   gap: 10px;
 }
 
+.result-header h3 {
+  margin: 0;
+}
+
 .badge.cached {
   background: #FF9800;
   color: black;
@@ -594,6 +601,7 @@ button:disabled {
 .remove-btn {
     background: #ff4444;
     margin-left: auto;
+    padding-bottom: 4px
 }
 
 .cached-suggestions {
@@ -743,7 +751,7 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
+  padding: 0 0 2px 1px;
   font-size: 14px;
   opacity: 0;
   transition: opacity 0.2s;
