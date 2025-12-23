@@ -11,7 +11,6 @@ const router = useRouter()
 const { currentRoundImages, state, config } = storeToRefs(gameStore)
 
 const showAnswers = ref(false)
-const containerRef = ref<HTMLElement | null>(null)
 const optimalCols = ref(4)
 
 function calculateOptimalGrid() {
@@ -245,6 +244,7 @@ function onNextRound() {
   font-size: 3.5rem;
   margin: 0 0 1rem 0;
   background: var(--gradient-primary);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
