@@ -1,13 +1,71 @@
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import Timer from './Timer.vue'
 
+import { useRouter } from 'vue-router'
+
 const gameStore = useGameStore()
+const router = useRouter()
 const { currentRoundImages, state, config } = storeToRefs(gameStore)
 
 const showAnswers = ref(false)
+const containerRef = ref<HTMLElement | null>(null)
+const optimalCols = ref(4)
+
+function calculateOptimalGrid() {
+  if (!currentRoundImages.value.length) return
+  
+  // Approximate available space
+  // We can use window dimensions or the container if available
+  const width = window.innerWidth * 0.98 // 98vw
+  const height = window.innerHeight - 180 // Approximate header/footer
+  const count = currentRoundImages.value.length
+  
+  let bestSize = 0
+  let bestCols = Math.ceil(Math.sqrt(count)) // Default square-ish start
+  
+  // Try all reasonable column counts
+  for (let cols = 1; cols <= count; cols++) {
+    const rows = Math.ceil(count / cols)
+    const cardWidth = (width / cols) - 16 // Account for gaps approx
+    // Aspect ratio 1:1, so height = width
+    const cardHeight = cardWidth
+    
+    // Check if it fits vertically
+    if (rows * (cardHeight + 16) <= height) {
+       // It fits, is it the biggest so far?
+       if (cardWidth > bestSize) {
+         bestSize = cardWidth
+         bestCols = cols
+       }
+    }
+  }
+  
+  // Fallback: if nothing fits 'perfectly' (e.g. too many items), 
+  // try to fill width decent amount, scroll is acceptable but we try to avoid.
+  // The logic above is strictly "fit in H", which might fail for 30 items on small screen.
+  // If bestSize is still 0, allow scrolling by using the square root heuristic or a max-height fit.
+  if (bestSize === 0) {
+      // Find layout that minimizes vertical overflow or balances ratio
+      // Square root heuristic adjusted for screen aspect ratio 16:9 ~ 1.77
+      bestCols = Math.ceil(Math.sqrt(count * 1.77))
+  }
+
+  optimalCols.value = bestCols
+}
+
+onMounted(() => {
+  window.addEventListener('resize', calculateOptimalGrid)
+  calculateOptimalGrid()
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', calculateOptimalGrid)
+})
+
+watch(() => currentRoundImages.value.length, calculateOptimalGrid)
 
 function onStartRound() {
   gameStore.startRound()
@@ -19,13 +77,18 @@ function onTimeout() {
 }
 
 function onNextRound() {
-  gameStore.endRound()
-  showAnswers.value = false
+  if (state.value.currentRound < config.value.rounds) {
+     gameStore.endRound()
+     showAnswers.value = false
+  } else {
+     gameStore.endGame()
+     router.push('/results')
+  }
 }
 </script>
 
 <template>
-  <div class="game-board">
+  <div class="game-board" ref="containerRef">
     <div class="header">
       <h2>Round {{ state.currentRound }} / {{ config.rounds }}</h2>
       <Timer 
@@ -51,7 +114,7 @@ function onNextRound() {
       <div 
         class="grid" 
         :class="{ blurred: state.roundStatus !== 'active' && !showAnswers }"
-        :style="{ '--cols': Math.ceil(Math.sqrt(config.picturesPerRound)) }"
+        :style="{ '--cols': optimalCols }"
       >
         <div 
           v-for="(img, index) in currentRoundImages" 
@@ -86,41 +149,58 @@ function onNextRound() {
 
 <style scoped>
 .game-board {
-  max-width: 1400px;
+  max-width: 98vw;
   margin: 0 auto;
-  padding: 1rem;
-  min-height: 100vh;
+  padding: 0.5rem;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent scrolling on the main container */
 }
 
 .header {
+  flex-shrink: 0; /* Header doesn't shrink */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem 2rem;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem 1.5rem;
   background: rgba(0,0,0,0.3);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(5px);
 }
 
+.header h2 {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
 .game-area {
   position: relative;
-  flex: 1;
+  flex: 1; /* Take up all remaining space */
   background: rgba(255,255,255,0.02);
   border-radius: var(--radius-lg);
-  padding: 2rem;
+  padding: 1rem;
   transition: all 0.3s;
+  display: flex; /* Use flex to center the grid if needed */
+  flex-direction: column;
+  overflow: hidden; 
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 0.8rem;
+  width: 100%;
+  height: 100%;
   transition: filter 0.5s ease;
+  overflow-y: auto; /* Scroll inside grid if absolutely necessary, but aiming for fit */
+  align-content: start; /* Pack items at the start */
 }
+
+/* Dynamic adjustment for very large counts could be handled via class, 
+   but minmax(140px, 1fr) usually fits ~30 on 1080p if height is sufficient.
+   Let's ensure the card aspect ratio is maintained but flexible. */
 
 .grid.blurred {
   filter: blur(20px) brightness(0.7);
@@ -137,11 +217,10 @@ function onNextRound() {
   justify-content: center;
   align-items: center;
   z-index: 10;
-  border-radius: var(--radius-lg);
 }
 
 .overlay-content {
-  background: rgba(30, 30, 30, 0.85); /* Slightly clearer */
+  background: rgba(30, 30, 30, 0.85);
   padding: 3rem 5rem;
   border-radius: var(--radius-lg);
   text-align: center;
@@ -198,10 +277,10 @@ function onNextRound() {
   width: 100%;
   background: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 0.8rem;
+  padding: 0.3rem; /* Smaller padding */
   text-align: center;
   font-weight: 700;
-  font-size: 1.2rem;
+  font-size: 0.9rem; /* Smaller font */
   z-index: 5;
   backdrop-filter: blur(4px);
 }
@@ -210,16 +289,16 @@ function onNextRound() {
   position: relative;
   aspect-ratio: 1;
   background: #1a1a1a;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md); /* Slightly smaller radius */
   overflow: hidden;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border: 1px solid rgba(255,255,255,0.05);
 }
 
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+  transform: translateY(-3px); /* Less movement */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
   border-color: rgba(255,255,255,0.2);
 }
 
@@ -242,43 +321,44 @@ img {
 
 .number-badge {
   position: absolute;
-  top: 15px;
-  left: 15px;
-  width: 45px;
-  height: 45px;
+  top: 8px; /* Closer to corner */
+  left: 8px;
+  width: 30px; /* Smaller badge */
+  height: 30px;
   background: var(--gradient-primary);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.4rem;
+  font-size: 1rem;
   font-weight: 800;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
   z-index: 2;
   border: 2px solid rgba(255,255,255,0.2);
 }
 
 .controls {
-  margin-top: 2rem;
-  min-height: 80px;
+  flex-shrink: 0; /* Controls don't shrink */
+  padding-top: 0.5rem;
+  min-height: auto; /* Remove fixed min-height */
   display: flex;
   justify-content: center;
 }
 
 .control-group {
   display: flex;
-  gap: 1.5rem;
+  gap: 1rem;
   background: rgba(0,0,0,0.4);
-  padding: 1rem 2rem;
+  padding: 0.5rem 1.5rem; /* Compact padding */
   border-radius: 50px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255,255,255,0.1);
 }
 
 button {
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
+  padding: 0.6rem 1.5rem; /* Smaller button padding */
+  font-size: 1rem;
   border-radius: 50px;
   cursor: pointer;
   font-weight: 600;

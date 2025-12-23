@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { watch, computed } from 'vue'
 import { useGameStore } from './stores/game'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
 
 // App.vue is now just a layout shell
 const gameStore = useGameStore()
 const { config } = storeToRefs(gameStore)
+const route = useRoute()
+
+const showHeader = computed(() => route.path !== '/game')
 
 function updateTheme() {
   if (config.value.theme === 'christmas') {
@@ -30,7 +34,7 @@ watch(() => config.value.theme, updateTheme, { immediate: true })
        }"></div>
     </div>
     
-    <header>
+    <header v-if="showHeader">
       <h1>Image Trivia</h1>
     </header>
     
@@ -46,10 +50,10 @@ watch(() => config.value.theme, updateTheme, { immediate: true })
 
 <style scoped>
 .app-container {
-  max-width: 1200px;
+  max-width: 100%;
   min-height: 100vh;
-  margin: 0 auto;
-  padding: 2rem;
+  margin: 0;
+  padding: 1rem;
   text-align: center;
   display: flex;
   flex-direction: column;

@@ -2,10 +2,16 @@
 import { useRouter } from 'vue-router'
 import { useGameStore } from '../stores/game'
 import { storeToRefs } from 'pinia'
+import { computed } from 'vue'
 
 const router = useRouter()
 const gameStore = useGameStore()
 const { config, savedGames } = storeToRefs(gameStore)
+
+const minutesPerRound = computed({
+  get: () => config.value.timePerRound / 60,
+  set: (val: number) => config.value.timePerRound = val * 60
+})
 
 function onNext() {
   router.push('/curator')
@@ -58,8 +64,8 @@ function onDeleteGame(index: number) {
         <div class="form-group">
           <label for="timer">Time per Round</label>
           <div class="input-wrapper">
-             <input id="timer" type="number" v-model="config.timePerRound" min="10" max="300" step="10" />
-             <span class="unit">sec</span>
+             <input id="timer" type="number" v-model="minutesPerRound" min="0.5" max="20" step="0.5" />
+             <span class="unit">min</span>
           </div>
         </div>
 

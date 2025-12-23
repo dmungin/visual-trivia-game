@@ -22,10 +22,18 @@ const nameList = ref(''); // Textarea input
 const searchResults = ref<{ name: string; images: string[]; selected: string | null; fromCache?: boolean }[]>([]);
 const isSearching = ref(false);
 const cachedNames = ref<string[]>([]);
+const selectedCached = ref<string[]>([]);
 
 // Computed for validation display
 const selectedCount = computed(() => searchResults.value.filter(r => r.selected).length);
 const progressPercent = computed(() => Math.min(100, (selectedCount.value / totalImagesNeeded.value) * 100));
+
+const selectAllCached = computed({
+  get: () => cachedNames.value.length > 0 && selectedCached.value.length === cachedNames.value.length,
+  set: (val: boolean) => {
+    selectedCached.value = val ? [...cachedNames.value] : [];
+  }
+});
 
 function loadCachedNames() {
   const names: string[] = [];
@@ -39,18 +47,21 @@ function loadCachedNames() {
   cachedNames.value = names.sort();
 }
 
-function addCachedName(name: string) {
-  const currentNames = nameList.value.split(',').map(n => n.trim().toLowerCase());
-  if (currentNames.includes(name.toLowerCase())) {
-    return;
+function addSelectedToSearch() {
+  if (selectedCached.value.length === 0) return;
+  const current = nameList.value ? nameList.value.split(',').map(n => n.trim()) : [];
+  // Append only unique ones
+  const newNames = selectedCached.value.filter(n => !current.some(c => c.toLowerCase() === n.toLowerCase()));
+  
+  if (newNames.length > 0) {
+    if (nameList.value && !nameList.value.trim().endsWith(',')) {
+      nameList.value += ', ';
+    }
+    nameList.value += newNames.join(', ');
   }
-
-  const current = nameList.value.trim();
-  if (current.length > 0 && !current.endsWith(',')) {
-    nameList.value += ', ' + name;
-  } else {
-    nameList.value += name;
-  }
+  
+  // Clear selection after adding? Maybe keep it for reference?
+  // Let's keep it.
 }
 
 // Load on mount
@@ -246,6 +257,40 @@ function removeResult(name: string) {
         updateStoreImages();
     }
 }
+
+function deleteCachedName(name: string) {
+  const cacheKey = `trivia_img_${name.toLowerCase()}`;
+  localStorage.removeItem(cacheKey);
+  cachedNames.value = cachedNames.value.filter(n => n !== name);
+}
+
+function deleteImageFromCache(item: typeof searchResults.value[0], imageUrl: string) {
+  // Remove from current view
+  const index = item.images.indexOf(imageUrl);
+  if (index !== -1) {
+    item.images.splice(index, 1);
+  }
+
+  // Update selection if needed
+  if (item.selected === imageUrl) {
+    item.selected = item.images[0] || null;
+  }
+  
+  // Update Store
+  updateStoreImages();
+
+  // Update Cache
+  const cacheKey = `trivia_img_${item.name.toLowerCase()}`;
+  if (item.images.length > 0) {
+    localStorage.setItem(cacheKey, JSON.stringify(item.images));
+  } else {
+    // If no images left, maybe remove the key entirely? 
+    // Or keep empty array? Let's remove key so it doesn't show as "Cached" with 0 items next time
+    localStorage.removeItem(cacheKey);
+    // Also remove from cachedNames if it was there
+    cachedNames.value = cachedNames.value.filter(n => n.toLowerCase() !== item.name.toLowerCase());
+  }
+}
 </script>
 
 <template>
@@ -306,17 +351,36 @@ function removeResult(name: string) {
         ></textarea>
         
         <div v-if="cachedNames.length > 0" class="cached-suggestions">
-          <p class="suggestion-label">Previously Found:</p>
-          <div class="chips">
-            <button 
+          <div class="cached-header">
+            <p class="suggestion-label">Previously Found ({{ cachedNames.length }}):</p>
+            <div class="select-all-wrapper">
+               <input type="checkbox" id="selectAll" v-model="selectAllCached" />
+               <label for="selectAll">Select All</label>
+            </div>
+          </div>
+          
+          <div class="chips checkbox-grid">
+            <div 
               v-for="name in cachedNames" 
               :key="name" 
-              @click="addCachedName(name)"
-              class="chip"
+              class="chip-wrapper checkbox-chip"
+              :class="{ active: selectedCached.includes(name) }"
             >
-              + {{ name }}
-            </button>
+              <label class="check-label">
+                <input type="checkbox" :value="name" v-model="selectedCached" />
+                <span class="name-text">{{ name }}</span>
+              </label>
+              <button @click.stop="deleteCachedName(name)" class="chip-delete" title="Remove from cache">×</button>
+            </div>
           </div>
+
+          <button 
+             v-if="selectedCached.length > 0"
+             @click="addSelectedToSearch" 
+             class="secondary-btn add-selected-btn"
+          >
+             Add {{ selectedCached.length }} Selected to Search
+          </button>
         </div>
 
         <button @click="startBatchSearch" :disabled="isSearching || !nameList">
@@ -346,6 +410,11 @@ function removeResult(name: string) {
               @click="selectImage(item.name, img)"
             >
               <img :src="img" loading="lazy" />
+              <button 
+                class="img-delete-btn" 
+                @click.stop="deleteImageFromCache(item, img)" 
+                title="Delete Image"
+              >×</button>
             </div>
           </div>
           <div v-else class="no-results">
@@ -359,10 +428,10 @@ function removeResult(name: string) {
 
 <style scoped>
 .image-curator {
-  max-width: 800px;
+  max-width: 98vw;
   margin: 0 auto;
   text-align: left;
-  padding-bottom: 100px; /* Space for fixed status bar if we wanted it fixed, but here it's top */
+  padding-bottom: 100px;
 }
 
 .header-row {
@@ -544,17 +613,149 @@ button:disabled {
   gap: 0.5rem;
 }
 
-.chip {
-  background: #444;
-  border: 1px solid #555;
-  border-radius: 16px;
-  padding: 4px 12px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: background 0.2s;
+.cached-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
 }
 
-.chip:hover {
-  background: #555;
+.select-all-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.select-all-wrapper input {
+ margin: 0;
+ width: auto;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 5px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.chip-wrapper.checkbox-chip {
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+  flex-wrap: nowrap;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.chip-wrapper.checkbox-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.chip-wrapper.checkbox-chip.active {
+  background: #2e7d32; /* darker green to indicate selection */
+  border-color: #4CAF50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 6px 10px;
+  cursor: pointer;
+  flex: 1;
+  overflow: hidden;
+}
+
+.check-label input {
+  margin: 0;
+  width: auto;
+}
+
+.name-text {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip-add {
+  display: none; /* No longer needed in checkbox mode */
+}
+
+.add-selected-btn {
+  margin-top: 1rem;
+  width: 100%;
+  padding: 0.8rem;
+  background: var(--color-secondary);
+  color: black;
+  font-weight: bold;
+}
+
+.add-selected-btn:hover {
+  background: #03dac6; /* Slightly lighter secondary */
+  transform: translateY(-2px);
+}
+
+.chip-delete {
+  background: rgba(0,0,0,0.2);
+  border: none;
+  padding: 4px 8px;
+  color: #aaa;
+  font-size: 1rem;
+  cursor: pointer;
+  border-left: 1px solid #555;
+}
+
+.chip-delete:hover {
+  background: #ff4444;
+  color: white;
+}
+
+.image-option {
+  position: relative;
+}
+
+.img-delete-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.img-delete-btn:hover {
+  background: #ff4444;
+  border-color: #ff4444;
+}
+
+.image-option:hover .img-delete-btn {
+  opacity: 1;
 }
 </style>

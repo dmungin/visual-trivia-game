@@ -87,8 +87,6 @@ function saveGame() {
       </div>
     </div>
 
-    <p class="instructions">Drag and drop images to rearrange them between rounds.</p>
-
     <div class="rounds-container">
       <div 
         v-for="(roundImages, index) in assignedRounds" 
@@ -121,7 +119,7 @@ function saveGame() {
 
 <style scoped>
 .round-assignment {
-  max-width: 1400px;
+  max-width: 98vw;
   margin: 0 auto;
   padding: 1rem;
   height: 100vh;
@@ -131,11 +129,13 @@ function saveGame() {
 
 .header {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
   margin-bottom: 2rem;
   width: 100%;
-  padding: 2rem;
+  padding: 1rem 2rem; /* Reduced padding */
   background: rgba(0,0,0,0.3);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(10px);
@@ -143,28 +143,20 @@ function saveGame() {
 }
 
 .header h2 {
-  align-self: flex-start;
   margin-bottom: 0;
-  font-size: 2.5rem;
+  font-size: 2rem; /* Slightly smaller */
+  white-space: nowrap;
 }
 
 .controls {
-  width: 100%;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
 }
 
-.instructions {
-  margin-bottom: 1.5rem;
-  color: var(--color-text-dim);
-  font-size: 1.1rem;
-  text-align: center;
-  background: rgba(0,0,0,0.2);
-  padding: 0.5rem;
-  border-radius: var(--radius-md);
-}
+
 
 .rounds-container {
   display: flex;
@@ -176,7 +168,8 @@ function saveGame() {
 }
 
 .round-column {
-  flex: 0 0 320px;
+  flex: 1 0 320px;
+  min-width: 320px;
   background: rgba(30, 30, 30, 0.6);
   backdrop-filter: blur(10px);
   border-radius: var(--radius-lg);

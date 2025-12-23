@@ -31,6 +31,11 @@ const router = createRouter({
             path: '/print-key',
             name: 'print-key',
             component: () => import('../components/PrintableAnswerKey.vue')
+        },
+        {
+            path: '/results',
+            name: 'results',
+            component: () => import('../components/ResultsView.vue')
         }
     ]
 })
