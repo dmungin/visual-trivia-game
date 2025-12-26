@@ -19,7 +19,7 @@ export interface GameState {
     score: number;
     isPlaying: boolean;
     images: TriviaImage[];
-    roundStatus: 'ready' | 'active' | 'complete';
+    roundStatus: 'ready' | 'active' | 'paused' | 'complete';
 }
 
 export interface SavedGame {

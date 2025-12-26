@@ -35,7 +35,7 @@ watch(() => config.value.theme, updateTheme, { immediate: true })
     </div>
     
     <header v-if="showHeader">
-      <h1>Image Trivia</h1>
+      <h1 class="no-print">Image Trivia</h1>
     </header>
     
     <main>
@@ -89,4 +89,10 @@ header {
   object-fit: cover;
   border-radius: 4px;
 }
+
+@media print {
+    .no-print {
+        display: none;
+    }
+} 
 </style>

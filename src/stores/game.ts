@@ -172,6 +172,18 @@ export const useGameStore = defineStore('game', () => {
         state.value.roundStatus = 'active'
     }
 
+    function pauseRound() {
+        if (state.value.roundStatus === 'active') {
+            state.value.roundStatus = 'paused'
+        }
+    }
+
+    function resumeRound() {
+        if (state.value.roundStatus === 'paused') {
+            state.value.roundStatus = 'active'
+        }
+    }
+
     function timeoutRound() {
         state.value.roundStatus = 'complete'
     }
@@ -220,6 +232,8 @@ export const useGameStore = defineStore('game', () => {
         setImages,
         startGame,
         startRound,
+        pauseRound,
+        resumeRound,
         timeoutRound,
         endRound,
         endGame,

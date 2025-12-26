@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useGameStore } from '../stores/game'
 import { storeToRefs } from 'pinia'
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import Timer from './Timer.vue'
 
 import { useRouter } from 'vue-router'
@@ -71,6 +71,22 @@ function onStartRound() {
   showAnswers.value = false
 }
 
+function onPauseToggle() {
+    if (state.value.roundStatus === 'active') {
+        gameStore.pauseRound()
+    } else if (state.value.roundStatus === 'paused') {
+        gameStore.resumeRound()
+    }
+}
+
+const timerStatus = computed(() => {
+    switch (state.value.roundStatus) {
+        case 'active': return 'running'
+        case 'paused': return 'paused'
+        default: return 'stopped'
+    }
+})
+
 function onTimeout() {
   gameStore.timeoutRound()
 }
@@ -90,11 +106,21 @@ function onNextRound() {
   <div class="game-board" ref="containerRef">
     <div class="header">
       <h2>Round {{ state.currentRound }} / {{ config.rounds }}</h2>
-      <Timer 
-        :duration="config.timePerRound" 
-        :active="state.roundStatus === 'active'"
-        @timeout="onTimeout"
-      />
+      <div class="header-actions">
+          <div v-if="state.roundStatus === 'active' || state.roundStatus === 'paused'" class="header-controls">
+            <button @click="onPauseToggle" class="pause-btn">
+                {{ state.roundStatus === 'paused' ? 'Resume' : 'Pause' }}
+            </button>
+            <button @click="onTimeout" class="secondary-btn end-round-btn">
+            End Round
+            </button>
+          </div>
+        <Timer 
+            :duration="config.timePerRound" 
+            :status="timerStatus"
+            @timeout="onTimeout"
+        />
+      </div>
     </div>
 
     <div class="game-area">
@@ -112,7 +138,7 @@ function onNextRound() {
 
       <div 
         class="grid" 
-        :class="{ blurred: state.roundStatus !== 'active' && !showAnswers }"
+        :class="{ blurred: state.roundStatus !== 'active' && state.roundStatus !== 'paused' && !showAnswers }"
         :style="{ '--cols': optimalCols }"
       >
         <div 
@@ -132,11 +158,7 @@ function onNextRound() {
     </div>
 
     <div class="controls">
-      <div v-if="state.roundStatus === 'active'" class="control-group">
-        <button @click="onTimeout" class="secondary-btn end-round-btn">
-          End Round
-        </button>
-      </div>
+
       
       <div v-if="state.roundStatus === 'complete'" class="control-group">
         <button @click="showAnswers = !showAnswers" class="toggle-answers-btn">
@@ -173,6 +195,17 @@ function onNextRound() {
   background: rgba(0,0,0,0.3);
   border-radius: var(--radius-lg);
   backdrop-filter: blur(5px);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
 }
 
 .header h2 {
@@ -281,12 +314,12 @@ function onNextRound() {
   bottom: 0;
   left: 0;
   width: 100%;
-  background: rgba(0, 0, 0, 0.9);
   color: white;
-  padding: 0.3rem; /* Smaller padding */
+  background: rgba(0,0,0);
+  padding: 0.1rem; /* Smaller padding */
   text-align: center;
   font-weight: 700;
-  font-size: 0.9rem; /* Smaller font */
+  font-size: 0.6rem; /* Smaller font */
   z-index: 5;
   backdrop-filter: blur(4px);
 }
@@ -295,7 +328,6 @@ function onNextRound() {
   position: relative;
   aspect-ratio: 1;
   background: #1a1a1a;
-  border-radius: var(--radius-md); /* Slightly smaller radius */
   overflow: hidden;
   box-shadow: var(--shadow-md);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -327,8 +359,8 @@ img {
 
 .number-badge {
   position: absolute;
-  top: 8px; /* Closer to corner */
-  left: 8px;
+  top: 2px; /* Closer to corner */
+  left: 2px;
   width: 30px; /* Smaller badge */
   height: 30px;
   background: var(--gradient-primary);
@@ -340,7 +372,7 @@ img {
   font-size: 1rem;
   font-weight: 800;
   box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  z-index: 2;
+  z-index: 6;
   border: 2px solid rgba(255,255,255,0.2);
 }
 
@@ -396,5 +428,19 @@ button:not(.toggle-answers-btn):not(.end-round-btn):hover {
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(255, 68, 68, 0.2);
+}
+
+.pause-btn {
+    background: rgba(255, 193, 7, 0.2);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    color: #ffea00;
+}
+
+.pause-btn:hover {
+    background: rgba(255, 193, 7, 0.3);
+    border-color: #ffea00;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(255, 193, 7, 0.2);
 }
 </style>

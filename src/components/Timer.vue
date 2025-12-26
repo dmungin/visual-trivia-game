@@ -3,7 +3,7 @@ import { ref, watch, onUnmounted } from 'vue'
 
 const props = defineProps<{
   duration: number
-  active: boolean
+  status: 'running' | 'paused' | 'stopped'
 }>()
 
 const emit = defineEmits(['timeout'])
@@ -20,7 +20,12 @@ function formatTime(seconds: number) {
 function startTimer() {
   if (intervalId) return
   
-  timeLeft.value = props.duration
+  // If we are at 0 (or below), reset. 
+  // But if we are paused, timeLeft is kept.
+  if (timeLeft.value <= 0) {
+      timeLeft.value = props.duration
+  }
+
   intervalId = window.setInterval(() => {
     if (timeLeft.value > 0) {
       timeLeft.value--
@@ -38,14 +43,25 @@ function stopTimer() {
   }
 }
 
-watch(() => props.active, (newVal) => {
-  if (newVal) {
+watch(() => props.status, (newStatus) => {
+  if (newStatus === 'running') {
     startTimer()
-  } else {
+  } else if (newStatus === 'paused') {
     stopTimer()
-    timeLeft.value = props.duration // Reset when stopped/inactive
+    // Do NOT reset timeLeft
+  } else {
+    // stopped
+    stopTimer()
+    timeLeft.value = props.duration 
   }
 }, { immediate: true })
+
+// Watch duration change to reset if stopped
+watch(() => props.duration, (newVal) => {
+    if (props.status === 'stopped') {
+        timeLeft.value = newVal
+    }
+})
 
 onUnmounted(() => {
   stopTimer()

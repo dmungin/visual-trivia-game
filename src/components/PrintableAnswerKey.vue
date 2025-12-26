@@ -44,7 +44,7 @@ function onBack() {
     </div>
 
     <div class="print-content">
-        <h1>Trivia Answer Key</h1>
+        <h1 class="no-print">Trivia Answer Key</h1>
         
         <div v-for="(round, rIndex) in allRounds" :key="rIndex" class="round-block">
             <h2>Round {{ rIndex + 1 }}</h2>

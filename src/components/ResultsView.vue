@@ -68,7 +68,7 @@ h1 {
   font-size: 3rem;
   margin-bottom: 0.5rem;
   background: var(--gradient-primary);
-  -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -171,7 +171,7 @@ button {
 }
 
 .answer-reveal {
-  font-size: 1.1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: white;
   background: rgba(255,255,255,0.05);
